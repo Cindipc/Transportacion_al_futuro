@@ -139,7 +139,7 @@ namespace EiraGame
 
     public class GuardianBoss : MonoBehaviour
     {
-        private const int MaxHp = 8;
+        private const int MaxHp = 5;
         private int hp = MaxHp;
         private bool dormant = true;
         private bool dead;
@@ -239,15 +239,15 @@ namespace EiraGame
         private IEnumerator Burst()
         {
             Sfx.Play("pulse");
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
                 if (dead || dormant) yield break;
                 Vector2 toP = (Vector2)Player.transform.position - (Vector2)transform.position;
                 toP.Normalize();
                 Vector3 from = transform.position + (Vector3)(toP * 2.2f) + new Vector3(0f, 0.2f, 0f);
-                Projectile.Spawn(from, toP, "enemy", 2, 6f, "pulse", 3f, 0.55f);
+                Projectile.Spawn(from, toP, "enemy", 1, 5f, "pulse", 3f, 0.55f);
                 sr.sprite = attackSpr;
-                yield return new WaitForSeconds(0.15f);
+                yield return new WaitForSeconds(0.2f);
             }
         }
 

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +10,12 @@ namespace EiraGame
     {
         private Font font;
 
-        private GameObject hud, dialogueRoot, titleRoot, winRoot, overRoot, pauseRoot, bannerRoot, toastRoot;
+        private GameObject hud, dialogueRoot, titleRoot, winRoot, overRoot, pauseRoot, bannerRoot, toastRoot, cinRoot;
+        private Image cinBg;
+        private Text cinSub, cinSkip;
+        private bool cinActive;
+        private List<CinematicScene> cinScenes;
+        private System.Action cinDone;
 
         private Image[] hearts;
         private Image hpFill, energyFill;
@@ -62,6 +68,7 @@ namespace EiraGame
             BuildTitle();
             BuildEndPanels();
             BuildBannerAndToast();
+            BuildCinematic();
 
             hud.SetActive(true);
             dialogueRoot.SetActive(false);
@@ -71,6 +78,7 @@ namespace EiraGame
             pauseRoot.SetActive(false);
             bannerRoot.SetActive(false);
             toastRoot.SetActive(false);
+            cinRoot.SetActive(false);
         }
 
         private Canvas canvas_;
@@ -222,36 +230,32 @@ namespace EiraGame
             rt.anchorMax = Vector2.one;
             rt.sizeDelta = Vector2.zero;
 
-            MakeImage(titleRoot.transform, "BG", new Color(0.02f, 0.03f, 0.06f, 0.97f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f));
+            MakeImage(titleRoot.transform, "BG", Color.white, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f)).sprite = LoadSprite("cine_estrellas");
+            MakeImage(titleRoot.transform, "Muted", new Color(0f, 0f, 0f, 0.72f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f));
 
-            var t1 = MakeText(titleRoot.transform, "T1", 80, new Color(0.2f, 0.8f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -110f), new Vector2(1800f, 110f), TextAnchor.MiddleCenter);
-            t1.text = "E I R A";
-            AddOutline(t1, new Color(0.02f, 0.15f, 0.2f), 2.5f);
+            var t1 = MakeText(titleRoot.transform, "T1", 116, new Color(0.25f, 0.85f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(1800f, 140f), TextAnchor.MiddleCenter);
+            t1.text = "EIRA";
+            AddOutline(t1, new Color(0.02f, 0.15f, 0.22f), 3f);
 
-            var t2 = MakeText(titleRoot.transform, "T2", 40, Color.white, new Vector2(0.5f, 1f), new Vector2(0f, -225f), new Vector2(1800f, 55f), TextAnchor.MiddleCenter);
+            var t2 = MakeText(titleRoot.transform, "T2", 44, Color.white, new Vector2(0.5f, 1f), new Vector2(0f, -265f), new Vector2(1800f, 56f), TextAnchor.MiddleCenter);
             t2.text = "LA LLAVE DEL AÑO 3000";
 
-            var t3 = MakeText(titleRoot.transform, "T3", 24, new Color(0.9f, 0.9f, 0.9f), new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(1500f, 40f), TextAnchor.MiddleCenter);
-            t3.text = "Un videojuego 2D de plataformas basado en la historia original.";
+            MakeImage(titleRoot.transform, "Line", new Color(0.55f, 0.85f, 1f, 0.8f), new Vector2(0.5f, 1f), new Vector2(0f, -315f), new Vector2(760f, 4f));
 
-            var panel = MakeImage(titleRoot.transform, "Chip", new Color(0f, 0f, 0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(1300f, 400f));
-            _ = panel;
+            var dialog = MakeText(titleRoot.transform, "Story", 21, new Color(0.85f, 0.9f, 0.95f), new Vector2(0.5f, 1f), new Vector2(0f, -385f), new Vector2(1680f, 200f), TextAnchor.MiddleCenter);
+            dialog.text = "2026. Eira vivía con el corazón cansado y, aquella noche, dejó de latir.\n"
+                + "AÑO 3000. Despierta en un laboratorio abandonado. Solo NOVA la guía, las máquinas dominan las ruinas\n"
+                + "y su sangre es la llave del Núcleo Central. Kael hará lo imposible por usarla.";
 
-            var story = MakeText(titleRoot.transform, "Story", 22, new Color(0.85f, 0.9f, 0.95f), new Vector2(0.5f, 0.5f), new Vector2(0f, 150f), new Vector2(1180f, 300f), TextAnchor.MiddleCenter);
-            story.alignment = TextAnchor.MiddleCenter;
-            story.text = "Año 2026. Eira, una joven con el corazón enfermo y cansada de ser vista como una carga, decide rendirse.\nSu corazón se detiene…\n\n"
-                + "AÑO 3000.\nEira despierta en un laboratorio abandonado. Los humanos desaparecieron hace décadas. Las máquinas gobiernan las ruinas y solo un androide llamado NOVA parece querer ayudarla.\n\n"
-                + "Ella es la llave de un secreto antiguo: su sangre activa el Núcleo Central. Y alguien llamado Kael hará lo imposible por usarla.";
+            var start = MakeText(titleRoot.transform, "Start", 38, new Color(1f, 0.95f, 0.6f), new Vector2(0.5f, 0f), new Vector2(0f, 150f), new Vector2(1500f, 52f), TextAnchor.MiddleCenter);
+            start.text = "PRESIONA  [E]  PARA COMENZAR EL NIVEL 1";
+            AddOutline(start, Color.black, 2.5f);
 
-            var controls = MakeText(titleRoot.transform, "Controls", 22, new Color(0.6f, 0.85f, 1f), new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(1400f, 30f), TextAnchor.MiddleCenter);
+            var controls = MakeText(titleRoot.transform, "Controls", 20, new Color(0.6f, 0.85f, 1f), new Vector2(0.5f, 0f), new Vector2(0f, 86f), new Vector2(1500f, 30f), TextAnchor.MiddleCenter);
             controls.text = "A/D mover · ESPACIO saltar · E interactuar · X pulso ADN";
 
-            var levels = MakeText(titleRoot.transform, "Levels", 22, Color.white, new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(1400f, 30f), TextAnchor.MiddleCenter);
-            levels.text = "NIVEL 1 · EL DESPERTAR [LISTO]     NIVEL 2 · LA CAZA [PRÓXIMAMENTE]     NIVEL 3 · LA ÚLTIMA GUERRA [PRÓXIMAMENTE]";
-
-            var start = MakeText(titleRoot.transform, "Start", 34, new Color(1f, 0.95f, 0.6f), new Vector2(0.5f, 0f), new Vector2(0f, 26f), new Vector2(1400f, 46f), TextAnchor.MiddleCenter);
-            start.text = "PRESIONA  [E]  PARA COMENZAR EL NIVEL 1";
-            AddOutline(start, Color.black, 2f);
+            var levels = MakeText(titleRoot.transform, "Levels", 19, Color.white, new Vector2(0.5f, 0f), new Vector2(0f, 44f), new Vector2(1600f, 30f), TextAnchor.MiddleCenter);
+            levels.text = "NIVEL 1 · EL DESPERTAR [LISTO]     NIVEL 2 · LA CAZA [LISTO]     NIVEL 3 · LA ÚLTIMA GUERRA [LISTO]";
         }
 
         private void BuildEndPanels()
@@ -327,6 +331,104 @@ namespace EiraGame
             MakeImage(toastRoot.transform, "BG", new Color(0.2f, 0f, 0f, 0.8f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 70f));
             toastText = MakeText(toastRoot.transform, "T", 28, new Color(1f, 0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980f, 60f), TextAnchor.MiddleCenter);
             AddOutline(toastText, Color.black, 1.5f);
+        }
+
+        private void BuildCinematic()
+        {
+            cinRoot = new GameObject("Cinematic", typeof(RectTransform));
+            cinRoot.transform.SetParent(Root, false);
+            var cr = (RectTransform)cinRoot.transform;
+            cr.anchorMin = Vector2.zero; cr.anchorMax = Vector2.one; cr.sizeDelta = Vector2.zero;
+
+            cinBg = MakeImage(cinRoot.transform, "Bg", Color.black, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f));
+            cinBg.preserveAspect = false;
+
+            cinSub = MakeText(cinRoot.transform, "Sub", 28, Color.white, new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(1600f, 150f), TextAnchor.MiddleCenter);
+            cinSub.horizontalOverflow = HorizontalWrapMode.Wrap;
+            AddOutline(cinSub, Color.black, 2f);
+
+            cinSkip = MakeText(cinRoot.transform, "Skip", 18, new Color(1f, 1f, 1f, 0.55f), new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(900f, 30f), TextAnchor.MiddleCenter);
+            cinSkip.text = "PRESIONA  [E]  PARA SALTAR LA INTRO";
+        }
+
+        // ---------- CINEMÁTICA ----------
+        public void PlayCinematic(List<CinematicScene> scenes, System.Action onDone)
+        {
+            cinScenes = scenes;
+            cinDone = onDone;
+            cinActive = true;
+            cinRoot.SetActive(true);
+            StartCoroutine(CinCo());
+        }
+
+        private bool CinSkipPressed => cinActive && (Inputs.Interact() || Inputs.Start() || Inputs.Restart());
+
+        private IEnumerator CinCo()
+        {
+            bool skip = false;
+            for (int i = 0; i < cinScenes.Count; i++)
+            {
+                if (cinScenes[i].Sprite != null)
+                    cinBg.sprite = LoadSprite(cinScenes[i].Sprite);
+                cinSub.text = cinScenes[i].Subtitle ?? "";
+                if (i == 0 || skip)
+                {
+                    Color c = cinBg.color; c.a = 1f; cinBg.color = c;
+                    Color s = cinSub.color; s.a = 1f; cinSub.color = s;
+                }
+                else
+                {
+                    float t = 0f;
+                    while (t < 0.5f)
+                    {
+                        if (CinSkipPressed) { skip = true; break; }
+                        t += Time.unscaledDeltaTime;
+                        float a = Mathf.Clamp01(t / 0.5f);
+                        Color bg = cinBg.color; bg.a = a; cinBg.color = bg;
+                        Color sb = cinSub.color; sb.a = a; cinSub.color = sb;
+                        yield return null;
+                    }
+                }
+
+                float hold = 0f;
+                float cam = (i % 2 == 0) ? 1f : -1f;
+                cinBg.rectTransform.localScale = Vector3.one;
+                cinBg.rectTransform.anchoredPosition = Vector2.zero;
+                while (hold < cinScenes[i].Duration)
+                {
+                    if (CinSkipPressed) { skip = true; break; }
+                    hold += Time.unscaledDeltaTime;
+                    float p = Mathf.Clamp01(hold / cinScenes[i].Duration);
+                    float sc = 1.03f + 0.06f * p;
+                    cinBg.rectTransform.localScale = new Vector3(sc, sc, 1f);
+                    cinBg.rectTransform.anchoredPosition = new Vector2(cam * (p - 0.5f) * 60f, (p - 0.5f) * 12f);
+                    yield return null;
+                }
+                cinBg.rectTransform.localScale = Vector3.one;
+                cinBg.rectTransform.anchoredPosition = Vector2.zero;
+
+                if (i < cinScenes.Count - 1)
+                {
+                    float t = 0f;
+                    while (t < 0.4f)
+                    {
+                        if (CinSkipPressed) { skip = true; break; }
+                        t += Time.unscaledDeltaTime;
+                        float a = 1f - Mathf.Clamp01(t / 0.4f);
+                        Color bg = cinBg.color; bg.a = a; cinBg.color = bg;
+                        Color sb = cinSub.color; sb.a = a; cinSub.color = sb;
+                        yield return null;
+                    }
+                }
+            }
+
+            Color fc = cinBg.color; fc.a = 0f; cinBg.color = fc;
+            Color fs = cinSub.color; fs.a = 0f; cinSub.color = fs;
+            cinActive = false;
+            cinRoot.SetActive(false);
+            var done = cinDone;
+            cinDone = null;
+            done?.Invoke();
         }
 
         // ---------- PUBLIC API ----------

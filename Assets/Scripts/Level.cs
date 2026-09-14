@@ -390,15 +390,14 @@ namespace EiraGame
 
             // ---------- PLATAFORMAS ----------
             Platform(35f, 45f, 3f);      // P1
-            Platform(60f, 66f, 2.5f);    // P2
-            Platform(69f, 81f, 3.6f);    // P3 (relé R2 + drones)
+            Platform(60f, 68f, 2.5f);    // P2
+            Platform(69f, 81f, 3f);      // P3 (relé R2 + dron) — altura baja para alcanzarla desde el suelo
             Platform(95f, 103f, 3f);     // P4
             Platform(111f, 121f, 4.2f);  // P5 (terminal T2 + cápsula)
             Platform(135f, 153f, 3f);    // P6 (recogibles + zona de evasión)
             Platform(107f, 111f, 2.2f);  // P7 (paso hacia P5)
 
             // ---------- PINCHOS DE SEGURIDAD ----------
-            SpikeZone.Create(new Vector3(24.5f, 1.6f, 0f), new Vector2(1.8f, 0.8f));
             SpikeZone.Create(new Vector3(130.5f, 1.6f, 0f), new Vector2(1.8f, 0.8f));
 
             // ---------- PUERTA ADN ----------
@@ -438,7 +437,7 @@ namespace EiraGame
 
             // ---------- ACERTIJO DE RELÉS ----------
             RelaySwitch r1 = RelaySwitch.Create(new Vector3(52f, 1.7f, 0f), "R1");
-            RelaySwitch r2 = RelaySwitch.Create(new Vector3(72f, 4.2f, 0f), "R2");
+            RelaySwitch r2 = RelaySwitch.Create(new Vector3(72f, 3.6f, 0f), "R2");
             DnaGateGate gate = DnaGateGate.Create(new Vector3(86f, 3.15f, 0f));
             GeneratorPuzzle.Create(r1, r2, gate);
 

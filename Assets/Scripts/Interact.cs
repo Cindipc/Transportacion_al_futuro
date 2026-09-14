@@ -61,6 +61,8 @@ namespace EiraGame
     // ============ PUERTA ADN ============
     public class DnaDoor : MonoBehaviour
     {
+        private static bool powerMomentDone;
+
         public bool IsOpen { get; private set; }
         private SpriteRenderer sr;
         private BoxCollider2D bc;
@@ -92,6 +94,30 @@ namespace EiraGame
             Fx.Spark(transform.position + new Vector3(0f, 2f, 0f), 0.8f);
             Sfx.Play("door");
             GameManager.I.UI.ShowShadowToast("La puerta reconoce tu señal genética.");
+            if (!powerMomentDone)
+            {
+                powerMomentDone = true;
+                FirstPower(transform.position);
+            }
+        }
+
+        // La historia: durante el primer contacto, la puerta corta la mano de Eira
+        // y una gota de sangre activa la máquina. Aquí descubre su poder por primera vez.
+        private void FirstPower(Vector3 at)
+        {
+            Fx.SparkBurst(at, 12, new Color(1f, 0.18f, 0.16f));
+            Fx.SparkBurst(at + new Vector3(0f, 1.8f, 0f), 7, new Color(1f, 0.75f, 0.15f));
+            Sfx.Play("boss");
+            var gm = GameManager.I;
+            if (gm == null) return;
+            gm.PlayDialogue(new List<DialogueLine>
+            {
+                new DialogueLine("EIRA", "¡…! ¿Qué ha sido eso? ¡Mi mano! Sentí como si algo me cortara."),
+                new DialogueLine("EIRA", "Esta puerta no pide una llave… pide sangre."),
+                new DialogueLine("NOVA", "Tu sangre ha encendido la máquina, Eira."),
+                new DialogueLine("EIRA", "¿Por qué… por qué mi sangre puede hacer esto?"),
+                new DialogueLine("NOVA", "Por eso Kael siempre te buscó. Tú no eres solo una superviviente… eres la llave del Núcleo."),
+            }, () => gm.SetObjective("Cruza la puerta y explora el laboratorio contando tus pistas."));
         }
     }
 

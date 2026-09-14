@@ -13,6 +13,14 @@ namespace EiraGame
         public DialogueLine(string sp, string tx) { Speaker = sp; Text = tx; }
     }
 
+    public class CinematicScene
+    {
+        public string Sprite;
+        public string Subtitle;
+        public float Duration;
+        public CinematicScene(string spr, string sub, float dur) { Sprite = spr; Subtitle = sub; Duration = dur; }
+    }
+
     /// <summary>Manejador global del juego: puntos, estado, UI y flujo.</summary>
     public class GameManager : MonoBehaviour
     {

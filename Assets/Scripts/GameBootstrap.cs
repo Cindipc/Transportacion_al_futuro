@@ -24,9 +24,44 @@ namespace EiraGame
             level.Player.SetRespawnPoint(spawn);
             level.Player.TeleportTo(spawn);
 
-            gm.SetState(GameState.Title);
-            gm.SetObjective("Despierta en el laboratorio abandonado. Encuentra al androide NOVA.");
-            ui.ShowTitle(() => IntroDialogue(gm));
+            gm.SetState(GameState.Intro);
+            gm.SetObjective("…");
+            ui.PlayCinematic(IntroScenes(), () =>
+            {
+                gm.SetState(GameState.Title);
+                gm.SetObjective("Despierta en el laboratorio abandonado. Encuentra al androide NOVA.");
+                ui.ShowTitle(() => IntroDialogue(gm));
+            });
+        }
+
+        private static List<CinematicScene> IntroScenes()
+        {
+            return new List<CinematicScene>
+            {
+                new CinematicScene("cine_casa",
+                    "Año 2026. Eira apenas estaba viva… y ya se sentía una carga para los que quería.\n" +
+                    "Por dentro, cada latido le dolía un poco más.",
+                    6.5f),
+                new CinematicScene("cine_familia",
+                    "Su familia la quería con locura. Pero Eira no entendía que su vida valía cada latido,\n" +
+                    "porque el corazón enfermo no se lo contaba.",
+                    6.5f),
+                new CinematicScene("cine_corazon",
+                    "Aquella noche su corazón se detuvo en silencio…\n" +
+                    "y Eira, por primera vez, no tuvo miedo de descansar.",
+                    7f),
+                new CinematicScene("cine_hospital",
+                    "En el hospital intentaron salvarle la vida.\n" +
+                    "Pero su corazón ya no quería seguir latiendo.",
+                    6.5f),
+                new CinematicScene("cine_renacer",
+                    "Sin embargo, algo despertó bajo sus párpados cerrados.\n" +
+                    "Un siglo después, una voz mecánica murmuró: “tranquila, no voy a hacerte daño”.",
+                    7f),
+                new CinematicScene("cine_estrellas",
+                    "Año 3000.\nLA LLAVE HA DESPERTADO.",
+                    6f),
+            };
         }
 
         private static void IntroDialogue(GameManager gm)
